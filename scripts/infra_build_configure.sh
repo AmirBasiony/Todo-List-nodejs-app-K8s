@@ -44,30 +44,17 @@ fi
 # Navigate to Ansible directory
 cd "$ANSIBLE_DIR" || exit 1
 
-# Prepare inventory.ini
+
+
+
 section_header "**********************    Generating Ansible inventory     ********************"
-
-
-INVENTORY_FILE="inventory.ini"
-CONFIG_FILE="ansible.cfg"
-touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
-
-
-# Write private_ec2 inventory
-{
-  echo "[remote_target]"
-  echo "$EC2_PUBLIC_IP"
-} > "$INVENTORY_FILE"
-
-cat $INVENTORY_FILE
-
-
-# Run Ansible playbook
-section_header "**********************    Running ansible rules     ***************************"
+# Prepare inventory.ini
 chmod 600 $SSH_KEY  # Secures the SSH private key
 touch inventory.ini && chmod 755 inventory.ini
 echo -e "[remote_target]\n$EC2_PUBLIC_IP" > inventory.ini
+cat inventory.ini
 
+section_header "**********************    Running ansible rules     ***************************"
 # Run the Ansible playbook 
 ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml
 

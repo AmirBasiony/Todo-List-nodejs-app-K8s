@@ -8,7 +8,7 @@ output "aws_region" {
 }
 
 output "public_subnet_id" {
-  value       = aws_subnet.public_subnet_K8s
+  value       = aws_subnet.public_subnet_K8s.id
   description = "ID of the public subnet"
 }
 
