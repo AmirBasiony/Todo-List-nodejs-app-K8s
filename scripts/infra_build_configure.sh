@@ -55,27 +55,24 @@ touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
 
 # Write private_ec2 inventory
 {
-  echo "[private_ec2]"
+  echo "[remote_target]"
   echo "$EC2_PUBLIC_IP"
 } > "$INVENTORY_FILE"
 
 cat $INVENTORY_FILE
-# Generate ansible.cfg
 
-section_header "**********************    Generating Ansible config     **********************"
-cat <<EOF > $CONFIG_FILE
-[defaults]
-inventory = inventory.ini
-EOF
 
-cat $CONFIG_FILE
+# Run Ansible playbook
+section_header "**********************    Running ansible rules     ***************************"
+chmod 600 $SSH_KEY  # Secures the SSH private key
+touch inventory.ini && chmod 755 inventory.ini
+echo -e "[remote_target]\n$EC2_PUBLIC_IP" > inventory.ini
 
-section_header "**********************    Run the Ansible playbook     **********************"
 # Run the Ansible playbook 
-ansible-playbook EC2_server.yaml --private-key=$SSH_KEY #-vvv
+ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml
 
 section_header "*********** Application EC2 server is configured successfully     *************"
-                
+
 cd ../
 
 section_header "***********     Push the changed to and trigger the pipeline      *************"

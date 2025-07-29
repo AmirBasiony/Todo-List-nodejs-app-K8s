@@ -3,12 +3,11 @@
 #-------------------------------------------------------------------------------------------
 # Usage:
 # Run the ansible playbook with the following command:
-# ansible-playbook EC2_server.yaml --private-key="../todo-app-ssh-key.pem"
+# ansible-playbook -i inventory --private-key ../todo-app-ssh-key.pem  EC2_server.yaml
 #============================================================================================
-# ---
-- name: Install Docker and Docker Compose via SSM on Private EC2
-  hosts: private_ec2
-  become: true
+  hosts: remote_target
+  remote_user: "ubuntu"
+  become: yes
 
   roles:
     - docker_install
