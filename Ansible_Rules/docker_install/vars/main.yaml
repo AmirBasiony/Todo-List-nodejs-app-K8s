@@ -1,0 +1,4 @@
+
+docker_compose_version: "1.29.2"  # Version of Docker Compose to install
+
+remoteHostUsername: "ubuntu"      # Remote host username

@@ -1,0 +1,8 @@
+node_modules/
+terraform/*.pem
+
+
+*tfvars*
+.terraform*
+*tfstate*
+

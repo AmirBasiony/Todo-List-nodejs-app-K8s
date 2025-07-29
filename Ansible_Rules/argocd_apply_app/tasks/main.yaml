@@ -1,0 +1,12 @@
+- name: Create namespace for app
+  command: kubectl create namespace node-app
+  ignore_errors: true
+
+- name: Copy ArgoCD Application manifest to EC2
+  copy:
+    src: ../../ArgoCD-Apps/application.yaml
+    dest: /home/ubuntu/application.yaml
+
+- name: Apply ArgoCD Application manifest
+  shell: |
+    kubectl apply -f /home/ubuntu/application.yaml

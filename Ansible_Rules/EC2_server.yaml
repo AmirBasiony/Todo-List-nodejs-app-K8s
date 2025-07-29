@@ -1,0 +1,18 @@
+#============================================================================================
+# Author: Amir ELbasiony
+#-------------------------------------------------------------------------------------------
+# Usage:
+# Run the ansible playbook with the following command:
+# ansible-playbook EC2_server.yaml --private-key="../todo-app-ssh-key.pem"
+#============================================================================================
+# ---
+- name: Install Docker and Docker Compose via SSM on Private EC2
+  hosts: private_ec2
+  become: true
+
+  roles:
+    - docker_install
+    # - aws_cli_install
+    - K8s_minikube_install
+    - argocd_install
+    - argocd_apply_app

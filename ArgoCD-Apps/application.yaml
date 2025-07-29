@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: todo-list-app-argo-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/harish981/argocd-node-app-config.git
+    targetRevision: main
+    path: K8s_manifests
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: K8s_manifests
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true

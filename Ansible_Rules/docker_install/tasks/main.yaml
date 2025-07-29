@@ -1,0 +1,63 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    name: docker.io
+    state: present
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Download Docker Compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: 'a+x'
+
+- name: Ensure Docker Compose binary is owned by root and belongs to docker group
+  file:
+    path: /usr/local/bin/docker-compose
+    owner: root
+    group: docker
+    mode: '0755'
+
+- name: Add user to Docker group
+  user:
+    name: "{{ remoteHostUsername }}"
+    groups: docker
+    append: yes
+
+- name: Check Docker version
+  command: "docker --version"
+  register: docker_version_output
+  changed_when: false
+
+- name: Print Docker version
+  debug:
+    var: docker_version_output.stdout
+
+- name: Check Docker Compose version
+  command: "docker-compose --version"
+  register: docker_compose_version_output
+  changed_when: false
+
+- name: Print Docker Compose version
+  debug:
+    var: docker_compose_version_output.stdout
+
+    
+# - name: Remove old Docker versions
+#   apt:
+#     name:
+#       - docker
+#       - docker-engine
+#       - docker.io
+#       - containerd
+#       - runc
+#     state: absent
+
+# - name: Remove Docker socket conflicts
+#   command: systemctl stop docker.socket
+#   ignore_errors: yes

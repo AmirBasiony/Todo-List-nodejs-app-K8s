@@ -1,0 +1,81 @@
+name: CI Pipeline for Todo Node.js App
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.prepare_image.outputs.image_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Prepare image name and tag
+        id: prepare_image
+        run: |
+          VERSION=$(jq -r .version package.json)
+          BUILD_ID=${{ github.run_number }}
+          IMAGE_TAG="v$VERSION.$BUILD_ID"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "::set-output name=image_tag::$IMAGE_TAG"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_NAME }}:latest
+
+  update-gitops-repo:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: AmirBasiony/todo-list-GitOps-ArgoCD-K8s
+          token: ${{ secrets.PAT }} # Must have push access
+          path: gitops-repo
+
+      - name: Update image in deployment YAML
+        run: |
+          cd gitops-repo/K8s_manifests
+          sed -i "s|image: .*$|image: ${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}|" todo-app_deployment.yaml
+
+      - name: Commit and push updated deployment
+        run: |
+          cd gitops-repo
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add K8s_manifests/todo-app_deployment.yaml
+          git commit -m "Update app image to ${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}"
+          git push

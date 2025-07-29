@@ -1,0 +1,41 @@
+- name: Install ArgoCD namespace
+  command: >
+    kubectl create namespace argocd
+  register: create_namespace_output
+  changed_when: "'created' in create_namespace_output.stdout"
+  ignore_errors: true
+
+- name: Install ArgoCD core components
+  shell: |
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  args:
+    warn: false
+
+- name: Wait for ArgoCD server to be available
+  shell: |
+    kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
+  register: wait_result
+  retries: 5
+  delay: 15
+  until: wait_result.rc == 0
+
+
+- name: Get ArgoCD NodePort
+  shell: |
+    kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[0].nodePort}'
+  register: argocd_nodeport
+
+- name: Print ArgoCD NodePort
+  debug:
+    msg: "ArgoCD is exposed on NodePort: {{ argocd_nodeport.stdout }}"
+
+
+- name: Get ArgoCD admin password (pod name)
+  shell: |
+    kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server \
+    -o jsonpath="{.items[0].metadata.name}"
+  register: argocd_admin_password
+
+- name: Print ArgoCD admin password
+  debug:
+    msg: "Initial ArgoCD admin password (pod name): {{ argocd_admin_password.stdout }}"

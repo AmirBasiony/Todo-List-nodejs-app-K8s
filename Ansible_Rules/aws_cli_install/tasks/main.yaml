@@ -1,0 +1,39 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install required dependencies
+  apt:
+    name:
+      - unzip
+      - curl
+    state: present
+
+- name: Download AWS CLI v2 installer
+  get_url:
+    url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+    dest: /tmp/awscliv2.zip
+
+- name: Unzip AWS CLI installer
+  unarchive:
+    src: /tmp/awscliv2.zip
+    dest: /tmp
+    remote_src: yes
+
+- name: Run AWS CLI installer
+  command: /tmp/aws/install
+  args:
+    creates: /usr/local/bin/aws
+
+- name: Verify AWS CLI installation
+  command: aws --version
+  register: aws_version_output
+
+- name: Show AWS CLI version
+  debug:
+    msg: "AWS CLI installed: {{ aws_version_output.stdout }}"
+
+- name: Install net-tools
+  apt:
+    name: net-tools
+    state: present
