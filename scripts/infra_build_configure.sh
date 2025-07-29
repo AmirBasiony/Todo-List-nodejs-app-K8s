@@ -31,9 +31,9 @@ AWS_REGION=$(terraform output -raw aws_region)
 
 # Display key info
 section_header "*******************   Infrastructure Deployed Successfully   *******************"
-echo           "*******************            $EC2_PUBLIC_IP            *******************"
-echo           "*******************     AWS Region: $AWS_REGION     *******************"
-echo           "*******************************************************************************"
+# echo           "*******************            $EC2_PUBLIC_IP            *******************"
+# echo           "*******************     AWS Region: $AWS_REGION     *******************"
+# echo           "*******************************************************************************"
 
 if [[ -z "$EC2_PUBLIC_IP" || -z "$AWS_REGION" ]]; then
   echo "ERROR: One or more required Terraform outputs are missing."
@@ -47,7 +47,7 @@ cd "$ANSIBLE_DIR" || exit 1
 
 
 
-section_header "**********************    Generating Ansible inventory     ********************"
+echo "**********************    Generating Ansible inventory     ********************"
 # Prepare inventory.ini
 chmod 600 $SSH_KEY  # Secures the SSH private key
 touch inventory.ini && chmod 755 inventory.ini

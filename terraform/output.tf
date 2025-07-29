@@ -1,5 +1,5 @@
 output "vpc_id" {
-  value       = aws_vpc.AppVPC_K8s
+  value       = aws_vpc.AppVPC_K8s.id
   description = "The ID of the main application VPC"
 }
 output "aws_region" {
