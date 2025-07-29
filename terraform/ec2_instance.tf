@@ -10,7 +10,6 @@ resource "aws_instance" "WebServer_K8s" {
   associate_public_ip_address = true
   key_name                    = "todo-app-ssh-key"
 
-  user_data = file("install_ssm_agent.sh")
   tags = {
     Name = "WebServer_K8s"
   }
