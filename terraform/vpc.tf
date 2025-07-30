@@ -40,7 +40,7 @@ resource "aws_subnet" "public_subnet_K8s" {
 ###############################
 #      SECURITY GROUPS       #
 ###############################
-resource "aws_security_group" "WebTrafficSG_K8s" {
+resource "aws_security_group" "MinikubeSG_K8s" {
   name        = "web-traffic-sg"
   description = "Allow app traffic on port 4000"
   vpc_id      = aws_vpc.AppVPC_K8s.id
@@ -76,7 +76,7 @@ resource "aws_security_group" "WebTrafficSG_K8s" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "WebTrafficSG_K8s"
+    Name = "MinikubeSG_K8s"
   }
 }
 

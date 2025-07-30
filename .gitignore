@@ -1,8 +1,7 @@
 node_modules/
+
 terraform/*.pem
-
-
-*tfvars*
-.terraform*
-*tfstate*
+terraform/*tfvars*
+terraform/.terraform*
+terraform/*tfstate*
 

@@ -16,5 +16,3 @@
     - aws_cli_install
     - K8s_minikube_install
     
-    # - argocd_install
-    # - argocd_apply_app

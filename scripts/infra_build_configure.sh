@@ -72,7 +72,7 @@ ssh -i "$SSH_KEY" ubuntu@"$EC2_PUBLIC_IP" \
 cd ../
 
 # Git push
-section_header "***********     Push the changes and trigger the pipeline      *************"
+section_header "************     Push the changes and trigger the pipeline      ***************"
 git add .
 git commit -m "${1:-"Auto: Infrastructure deployment"}"
 git push
