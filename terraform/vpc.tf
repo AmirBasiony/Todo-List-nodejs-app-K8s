@@ -58,8 +58,8 @@ resource "aws_security_group" "WebTrafficSG_K8s" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port   = 30001 #for todo app NodePort
-    to_port     = 30001
+    from_port   = 8080 #for todo app NodePort
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

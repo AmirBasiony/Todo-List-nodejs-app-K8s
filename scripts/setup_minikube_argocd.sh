@@ -12,12 +12,7 @@ echo "📦 Checking Minikube status..."
 minikube status
 
 echo "🧱 Creating 'argocd' namespace..."
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argocd
-EOF
+kubectl create namespace argocd
 
 echo "📥 Installing ArgoCD core components..."
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -48,15 +43,16 @@ echo "✅ Initial ArgoCD admin password (pod name): $ARGOCD_PASSWORD"
 
 
 # echo "🚀 Starting ArgoCD port forwarding on port 8888 (mapping to 443 inside cluster)..."
-# Kill any existing port-forward on 8888 (optional safety)
+# Kill any existing port-forward on 8888 and 8080 (optional safety)
 lsof -ti:8888 | xargs -r kill
+lsof -ti:8080 | xargs -r kill
 
 echo 
 echo "*******************************************************************************"
 # Port forward ArgoCD service from inside the cluster (443) to EC2's port 8888
-echo   "At a terminal run this line to makePort forward ArgoCD service from inside the cluster"
+echo   "At a terminal run this line to make Port forwarding ArgoCD service from inside the cluster"
 echo   ssh -i todo-app-ssh-key.pem  ubuntu@$EC2_PUBLIC_IP 
-echo  "kubectl port-forward svc/argocd-server -n argocd 8888:443 > /dev/null 2>&1 &"
+echo  "kubectl port-forward --address 0.0.0.0 svc/argocd-server 8080:80 -n argocd"
 echo "*******************************************************************************"
 
 echo "At Another terminal run this line to accesss ArgoCD from your LocalHost"
@@ -67,12 +63,7 @@ echo "🌐 ArgoCD is now accessible at: http://localhost:8888"
 echo "*******************************************************************************"
 
 echo "🧱 Creating 'todo-list-app' namespace..."
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: todo-list-app
-EOF
+kubectl create namespace todo-list-app
 
 echo kubectl create secret docker-registry ecr-creds
 kubectl create secret docker-registry ecr-creds \
@@ -82,4 +73,4 @@ kubectl create secret docker-registry ecr-creds \
   --docker-password="$(aws ecr get-login-password --region us-east-1)"
 
 
-
+# kubectl port-forward --address 0.0.0.0 svc/argocd-server 8080:80 -n argocd
