@@ -2,12 +2,11 @@
 
 set -e
 # EC2_PUBLIC_IP=$1
-
 echo "🚀 Deleting existing Minikube cluster..."
 minikube delete
 
 echo "🚀 Starting new Minikube cluster with Docker driver..."
-minikube start --driver=docker
+minikube start --driver=docker --cpus=2 --memory=2200mb --disk-size=20g
 
 echo "📦 Checking Minikube status..."
 minikube status
@@ -52,7 +51,7 @@ echo "✅ Initial ArgoCD admin password (pod name): $ARGOCD_PASSWORD"
 # Kill any existing port-forward on 8888 (optional safety)
 lsof -ti:8888 | xargs -r kill
 
-echo
+echo 
 echo "*******************************************************************************"
 # Port forward ArgoCD service from inside the cluster (443) to EC2's port 8888
 echo   "At a terminal run this line to makePort forward ArgoCD service from inside the cluster"
@@ -67,10 +66,20 @@ echo "**************************************************************************
 echo "🌐 ArgoCD is now accessible at: http://localhost:8888"
 echo "*******************************************************************************"
 
+echo "🧱 Creating 'todo-list-app' namespace..."
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: todo-list-app
+EOF
+
 echo kubectl create secret docker-registry ecr-creds
 kubectl create secret docker-registry ecr-creds \
   --namespace=todo-list-app \
   --docker-server=875506561855.dkr.ecr.us-east-1.amazonaws.com \
   --docker-username=AWS \
   --docker-password="$(aws ecr get-login-password --region us-east-1)"
+
+
 
