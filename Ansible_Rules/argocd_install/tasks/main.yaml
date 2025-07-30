@@ -1,15 +1,26 @@
-- name: Install ArgoCD namespace
-  command: >
-    kubectl create namespace argocd
+- name: Ensure ArgoCD namespace exists
+  command: kubectl apply -f - 
+  args:
+    stdin: |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argocd
   register: create_namespace_output
-  changed_when: "'created' in create_namespace_output.stdout"
-  ignore_errors: true
+
+
+- name: Debug | ArgoCD Namespace creation output
+  debug:
+    msg: "ArgoCD Namespace creation output: {{ create_namespace_output.stdout }}"
 
 - name: Install ArgoCD core components
   shell: |
     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-  args:
-    warn: false
+  register: install_argocd_output
+
+- name: Debug | ArgoCD core components installation output
+  debug:
+    msg: "ArgoCD installation output: {{ install_argocd_output.stdout_lines }}"
 
 - name: Wait for ArgoCD server to be available
   shell: |
@@ -19,23 +30,42 @@
   delay: 15
   until: wait_result.rc == 0
 
-
-- name: Get ArgoCD NodePort
-  shell: |
-    kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[0].nodePort}'
-  register: argocd_nodeport
-
-- name: Print ArgoCD NodePort
+- name: Debug | Wait result for ArgoCD server
   debug:
-    msg: "ArgoCD is exposed on NodePort: {{ argocd_nodeport.stdout }}"
+    msg: "Wait command result: {{ wait_result.stdout }}"
 
-
-- name: Get ArgoCD admin password (pod name)
+# Ensure ArgoCD service type is ClusterIP
+- name: Patch ArgoCD service to ClusterIP (for safety)
   shell: |
-    kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server \
-    -o jsonpath="{.items[0].metadata.name}"
-  register: argocd_admin_password
+    kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "ClusterIP"}}'
+  ignore_errors: true
+  register: patch_svc_result
 
-- name: Print ArgoCD admin password
+- name: Debug | Service patch result
   debug:
-    msg: "Initial ArgoCD admin password (pod name): {{ argocd_admin_password.stdout }}"
+    msg: "Service patch result: {{ patch_svc_result.stdout }}"
+
+# # Port forward ArgoCD 443 to EC2 port 8080
+# - name: Port forward ArgoCD service to EC2 port 8080
+#   shell: |
+#     nohup kubectl port-forward svc/argocd-server -n argocd 8080:443 > /dev/null 2>&1 &
+#   args:
+#     executable: /bin/bash
+#   async: 0
+#   poll: 0
+#   ignore_errors: true
+
+# - name: Debug | Port forwarding
+#   debug:
+#     msg: "Port forwarding started: ArgoCD should be accessible at http://<EC2_PUBLIC_IP>:8080"
+
+# # Get admin password (pod name by default)
+# - name: Get ArgoCD admin password (pod name)
+#   shell: |
+#     kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server \
+#     -o jsonpath="{.items[0].metadata.name}"
+#   register: argocd_admin_password
+
+# - name: Debug | ArgoCD admin password (pod name)
+#   debug:
+#     msg: "Initial ArgoCD admin password (pod name): {{ argocd_admin_password.stdout }}"

@@ -8,10 +8,12 @@
 - hosts: remote_target
   remote_user: "ubuntu"
   become: yes
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
   roles:
     - docker_install
-    # - aws_cli_install
+    - aws_cli_install
     - K8s_minikube_install
-    - argocd_install
-    - argocd_apply_app
+    # - argocd_install
+    # - argocd_apply_app

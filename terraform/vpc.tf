@@ -46,8 +46,14 @@ resource "aws_security_group" "WebTrafficSG_K8s" {
   vpc_id      = aws_vpc.AppVPC_K8s.id
 
   ingress {
-    from_port   = 4000
+    from_port   = 4000 #for todo app
     to_port     = 4000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 8888 #for argocd NodePort
+    to_port     = 8888
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

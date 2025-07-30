@@ -9,9 +9,8 @@ variable "ami" {
   default     = "ami-0a7d80731ae1b2435"
 }
 
-
 variable "instance_type" {
   description = "Type of EC2 instance"
-  default     = "t2.micro"
+  default     = "t3.medium"
 }
 

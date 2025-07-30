@@ -1,6 +1,16 @@
-- name: Create namespace for app
-  command: kubectl create namespace node-app
-  ignore_errors: true
+- name: Ensure App namespace exists
+  command: kubectl apply -f - 
+  args:
+    stdin: |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: node-app
+  register: create_namespace_output
+
+- name: Debug | App Namespace creation output
+  debug:
+    msg: "App Namespace creation output: {{ create_namespace_output.stdout }}"
 
 - name: Copy ArgoCD Application manifest to EC2
   copy:
@@ -10,3 +20,8 @@
 - name: Apply ArgoCD Application manifest
   shell: |
     kubectl apply -f /home/ubuntu/application.yaml
+  register: create_argocd_app_output
+
+- name: Debug | ArgoCD creation output
+  debug:
+    msg: "ArgoCD creation output: {{ create_argocd_app_output.stdout }}"

@@ -54,7 +54,38 @@
 
 # ------------------ Start Minikube ------------------
 
-- name: Start Minikube with Docker driver
-  shell: "minikube start --driver=docker"
-  args:
-    executable: /bin/bash
+# - name: Start Minikube with Docker driver
+#   shell: "minikube start --driver=docker --cpus=2 --memory=2048 --force"
+#   args:
+#     executable: /bin/bash
+
+
+# - name: Show Minikube status
+#   shell: "minikube status"
+#   register: minikube_status
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Minikube status
+#   debug:
+#     var: minikube_status.stdout_lines
+
+# - name: Show Kubernetes cluster info
+#   shell: "kubectl cluster-info"
+#   register: kube_cluster_info
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Kubernetes cluster info
+#   debug:
+#     var: kube_cluster_info.stdout_lines
+
+# - name: Show all Kubernetes nodes
+#   shell: "kubectl get nodes -o wide"
+#   register: kube_nodes
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Kubernetes nodes
+#   debug:
+#     var: kube_nodes.stdout_lines

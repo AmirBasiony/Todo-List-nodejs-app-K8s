@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define variables
-
+SCRIPTS_DIR="../scripts"
 TERRAFORM_DIR="../terraform/"
 ANSIBLE_DIR="../Ansible_Rules/"
 INFRA_DIAGRAM_DIR="../infrastructure_diagram"
@@ -18,8 +18,8 @@ cd $TERRAFORM_DIR
 
 # Build infrastructure
 section_header "*********************    Building the infrastructure     **********************"
-terraform init #-reconfigure
-terraform validate
+# terraform init #-reconfigure
+# terraform validate
 terraform apply -auto-approve -refresh=false
 
 mkdir -p "$INFRA_DIAGRAM_DIR"
@@ -31,23 +31,19 @@ AWS_REGION=$(terraform output -raw aws_region)
 
 # Display key info
 section_header "*******************   Infrastructure Deployed Successfully   *******************"
-# echo           "*******************            $EC2_PUBLIC_IP            *******************"
-# echo           "*******************     AWS Region: $AWS_REGION     *******************"
-# echo           "*******************************************************************************"
+echo           "*******************            $EC2_PUBLIC_IP            *******************"
+echo           "*******************     AWS Region: $AWS_REGION     *******************"
+echo           "*******************************************************************************"
 
 if [[ -z "$EC2_PUBLIC_IP" || -z "$AWS_REGION" ]]; then
   echo "ERROR: One or more required Terraform outputs are missing."
   exit 1
 fi
 
-
 # Navigate to Ansible directory
 cd "$ANSIBLE_DIR" || exit 1
 
-
-
-
-echo "**********************    Generating Ansible inventory     ********************"
+section_header "**********************    Generating Ansible inventory     ********************"
 # Prepare inventory.ini
 chmod 600 $SSH_KEY  # Secures the SSH private key
 touch inventory.ini && chmod 755 inventory.ini
@@ -56,7 +52,13 @@ cat inventory.ini
 
 section_header "**********************    Running ansible rules     ***************************"
 # Run the Ansible playbook 
-ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml
+ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml 
+
+
+cd $SCRIPTS_DIR
+scp -i $SSH_KEY ../ArgoCD-Apps/application.yaml ubuntu@$EC2_PUBLIC_IP:~/application.yaml
+scp -i $SSH_KEY setup_minikube_argocd.sh ubuntu@$EC2_PUBLIC_IP:~/setup_minikube_argocd.sh
+ssh -i $SSH_KEY ubuntu@$EC2_PUBLIC_IP "cd ~ && chmod +x ~/setup_minikube_argocd.sh && ./setup_minikube_argocd.sh" # $EC2_PUBLIC_IP"
 
 section_header "*********** Application EC2 server is configured successfully     *************"
 

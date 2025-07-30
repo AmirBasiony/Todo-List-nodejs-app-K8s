@@ -23,3 +23,7 @@ output "ecr_url" {
 output "ecr_registry" {
   value = data.aws_ecr_repository.app_ecr.registry_id
 }
+
+output "instance_type" {
+  value = var.instance_type
+}
