@@ -20,7 +20,7 @@ cd $TERRAFORM_DIR
 section_header "*********************    Building the infrastructure     **********************"
 # terraform init #-reconfigure
 # terraform validate
-terraform apply -auto-approve -refresh=false
+# terraform apply -auto-approve -refresh=false
 
 mkdir -p "$INFRA_DIAGRAM_DIR"
 terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
@@ -52,7 +52,7 @@ cat inventory.ini
 
 section_header "**********************    Running ansible rules     ***************************"
 # Run the Ansible playbook 
-ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml 
+# ansible-playbook -i inventory.ini --private-key $SSH_KEY  EC2_server.yaml 
 
 
 cd $SCRIPTS_DIR
