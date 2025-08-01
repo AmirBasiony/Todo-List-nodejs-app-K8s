@@ -69,9 +69,9 @@ cd "$SCRIPTS_DIR" || { echo "ERROR: Scripts directory not found!"; exit 1; }
 
 # SCP and remote execution
 scp -i "$SSH_KEY" ../ArgoCD-Apps/application.yaml ubuntu@"$EC2_PUBLIC_IP":~/application.yaml
-scp -i "$SSH_KEY" setup_minikube_argocd.sh ubuntu@"$EC2_PUBLIC_IP":~/setup_minikube_argocd.sh
+scp -i "$SSH_KEY" setup_kind_argocd.sh ubuntu@"$EC2_PUBLIC_IP":~/setup_kind_argocd.sh
 ssh -i "$SSH_KEY" ubuntu@"$EC2_PUBLIC_IP" \
-  "chmod +x ~/setup_minikube_argocd.sh && ~/setup_minikube_argocd.sh"
+  "chmod +x ~/setup_kind_argocd.sh && ~/setup_kind_argocd.sh"
 
 # Return to root project directory
 cd ../

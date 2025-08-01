@@ -21,19 +21,6 @@ else
   EC2_PUBLIC_IP="<YOUR_EC2_PUBLIC_IP_HERE>"
 fi
 
-
-
-# # Step 1: Clean up and start Minikube
-# section_header "*******************    Deleting existing Minikube cluster    ******************"
-# minikube delete
-
-# section_header "*******************     Starting new Minikube cluster      ********************"
-# minikube start --driver=docker --cpus=2 --memory=2200mb --disk-size=20g
-
-# section_header "*******************       Verifying Minikube status        ********************"
-# minikube status
-
-
 # Define Kind cluster name
 CLUSTER_NAME="todo-list-cluster"
 
@@ -63,29 +50,28 @@ fi
 section_header "*******************   Installing ArgoCD core components     *******************"
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-section_header "***************    Waiting for ArgoCD server to be available    ***************"
+section_header "***************    Waiting for ArgoCD server to be available    ***************" "1"
 kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
 
-section_header "*******************   Patching ArgoCD service to ClusterIP   ******************"
+section_header "*******************   Patching ArgoCD service to ClusterIP   ******************" "1"
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "ClusterIP"}}' || true
 
-section_header "********************  Applying ArgoCD Application manifest  *******************"
+section_header "********************  Applying ArgoCD Application manifest  *******************" "1"
 kubectl apply -f /home/ubuntu/application.yaml
 
 # Step 5: Access Info
-section_header "**********************  Fetching ArgoCD credentials  **************************"
+section_header "**********************  Fetching ArgoCD credentials  **************************" "1"
 ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
 echo "ArgoCD Username: admin"
 echo "ArgoCD Initial Password: $ARGOCD_PASSWORD"
 
 # Step 6: Port forwarding instructions
-section_header "**********************     Port Forward Instructions     **********************"
+section_header "**********************     Port Forward Instructions     **********************" "1"
 
 echo "To access ArgoCD (in one terminal):"
 echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
 echo "kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd"
-
 echo "Open in browser: http://$EC2_PUBLIC_IP:8888"
 
 echo -e "\nTo access your Node app (in another terminal):"
