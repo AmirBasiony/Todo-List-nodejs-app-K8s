@@ -1,0 +1,138 @@
+- name: Install curl and apt-transport-https
+  apt:
+    name:
+      - curl
+      - apt-transport-https
+    state: present
+    update_cache: yes
+
+# ------------------ kubectl Installation ------------------
+
+- name: Get latest stable kubectl version
+  shell: "curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+  register: kubectl_version
+  changed_when: false
+
+- name: Download kubectl binary
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+
+- name: Verify kubectl version
+  command: kubectl version --client
+  register: kubectl_version_output
+  changed_when: false
+
+- name: Print kubectl version
+  debug:
+    var: kubectl_version_output.stdout
+
+# ------------------ Kind Installation ------------------
+
+- name: Download kind binary
+  get_url:
+    url: https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+    dest: /usr/local/bin/kind
+    mode: '0755'
+
+- name: Verify kind installation
+  command: kind version
+  register: kind_version_output
+  changed_when: false
+
+- name: Print kind version
+  debug:
+    var: kind_version_output.stdout
+
+# ------------------ Create Kind Cluster ------------------
+
+- name: Create a Kind cluster named 'todo-list-cluster'
+  command: kind create cluster --name todo-list-cluster
+  register: kind_cluster_output
+  changed_when: "'Creating' in kind_cluster_output.stdout"
+
+- name: Print cluster creation output
+  debug:
+    var: kind_cluster_output.stdout
+
+- name: Show Kind cluster info
+  command: kubectl cluster-info --context kind-todo-list-cluster
+  register: kind_cluster_info
+  changed_when: false
+
+- name: Print Kind cluster info
+  debug:
+    var: kind_cluster_info.stdout_lines
+
+- name: Show all Kubernetes nodes in Kind cluster
+  command: kubectl get nodes --context kind-todo-list-cluster -o wide
+  register: kube_nodes
+  changed_when: false
+
+- name: Print Kubernetes nodes in Kind cluster
+  debug:
+    var: kube_nodes.stdout_lines
+
+
+# # ------------------ Minikube Installation ------------------
+
+# - name: Download Minikube binary
+#   get_url:
+#     url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+#     dest: /usr/local/bin/minikube
+#     mode: '0755'
+
+# - name: Ensure Minikube is executable
+#   file:
+#     path: /usr/local/bin/minikube
+#     mode: '0755'
+#     owner: root
+#     group: root
+
+# - name: Verify Minikube version
+#   command: minikube version
+#   register: minikube_version_output
+#   changed_when: false
+
+# - name: Print Minikube version
+#   debug:
+#     var: minikube_version_output.stdout
+
+# ------------------ Start Minikube ------------------
+
+# - name: Start Minikube with Docker driver
+#   shell: "minikube start --driver=docker --cpus=2 --memory=2048 --force"
+#   args:
+#     executable: /bin/bash
+
+
+# - name: Show Minikube status
+#   shell: "minikube status"
+#   register: minikube_status
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Minikube status
+#   debug:
+#     var: minikube_status.stdout_lines
+
+# - name: Show Kubernetes cluster info
+#   shell: "kubectl cluster-info"
+#   register: kube_cluster_info
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Kubernetes cluster info
+#   debug:
+#     var: kube_cluster_info.stdout_lines
+
+# - name: Show all Kubernetes nodes
+#   shell: "kubectl get nodes -o wide"
+#   register: kube_nodes
+#   args:
+#     executable: /bin/bash
+
+# - name: Print Kubernetes nodes
+#   debug: 
+#     var: kube_nodes.stdout_lines

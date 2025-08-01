@@ -14,5 +14,5 @@
   roles:
     - docker_install
     - aws_cli_install
-    - K8s_minikube_install
+    - Kubectl_Kind_install
     
