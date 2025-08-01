@@ -41,25 +41,24 @@ CLUSTER_NAME="todo-list-cluster"
 if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
   section_header "****** Kind cluster '${CLUSTER_NAME}' already exists. Skipping creation *****" "1"
 else
-  section_header "*************** Creating new Kind cluster: ${CLUSTER_NAME}  *****************"
+  section_header "*************** Creating new Kind cluster: ${CLUSTER_NAME}  *****************" "1"
   kind create cluster --name "$CLUSTER_NAME"
 fi
 
-# Step 2: Export kubeconfig path (important in automation or headless environments)
-# export KUBECONFIG="$(kind get kubeconfig-path --name="$CLUSTER_NAME" 2>/dev/null || echo "${HOME}/.kube/config")"
-
 # Step 3: Verify Kind cluster is running
 section_header "********************     Verifying Kind cluster status     ********************"
-# sudo kubectl config use-context kind-${CLUSTER_NAME}
 kind export kubeconfig --name "$CLUSTER_NAME"
-
 kubectl cluster-info --context kind-"$CLUSTER_NAME"
-kubectl get nodes --context kind-"$CLUSTER_NAME" -o wide
+kubectl get nodes --context kind-"$CLUSTER_NAME" #-o wide
 
 
 # Step 4: Install ArgoCD
 section_header "*******************        Creating 'argocd' namespace      *******************" "1"
-kubectl create namespace argocd
+if ! kubectl get namespace argocd >/dev/null 2>&1; then
+  kubectl create namespace argocd
+else
+  echo "Namespace 'argocd' already exists. Skipping creation."
+fi
 
 section_header "*******************   Installing ArgoCD core components     *******************"
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -87,27 +86,42 @@ echo "To access ArgoCD (in one terminal):"
 echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
 echo "kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd"
 
-echo -e "\nThen on your local terminal:"
-echo "ssh -i todo-app-ssh-key.pem -L 8888:localhost:8888 ubuntu@$EC2_PUBLIC_IP"
-echo "Open in browser: http://localhost:8888"
+echo "Open in browser: http://$EC2_PUBLIC_IP:8888"
 
 echo -e "\nTo access your Node app (in another terminal):"
 echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
-echo "kubectl port-forward --address=0.0.0.0 svc/todo-service 8080:4000 -n todo-list-app"
-
-echo -e "\nOn your local:"
-echo "ssh -i todo-app-ssh-key.pem -L 8080:localhost:8080 ubuntu@$EC2_PUBLIC_IP"
-echo "Open in browser: http://localhost:8080"
+echo "Open in browser: http://$EC2_PUBLIC_IP:8080"
 
 # section_header "*********************  Creating ECR Docker registry secret  *******************"
 
 # Step 5: Setup App Namespace and Secrets for the application
 section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
-kubectl create namespace todo-list-app
-kubectl create secret docker-registry ecr-creds \
-  --namespace=todo-list-app \
-  --docker-server=875506561855.dkr.ecr.us-east-1.amazonaws.com \
-  --docker-username=AWS \
-  --docker-password="$(aws ecr get-login-password --region us-east-1)"
+# Create 'argocd' namespace if it doesn't exist
+section_header "*******************        Creating 'argocd' namespace      *******************" "1"
+if ! kubectl get namespace argocd >/dev/null 2>&1; then
+  kubectl create namespace argocd
+else
+  echo "Namespace 'argocd' already exists. Skipping creation."
+fi
 
-section_header "**************   Kind & ArgoCD Setup Completed Successfully   *************"
+# Create 'todo-list-app' namespace if it doesn't exist
+section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
+if ! kubectl get namespace todo-list-app >/dev/null 2>&1; then
+  kubectl create namespace todo-list-app
+else
+  echo "Namespace 'todo-list-app' already exists. Skipping creation."
+fi
+
+# Create ECR docker-registry secret if it doesn't exist
+if ! kubectl get secret ecr-creds -n todo-list-app >/dev/null 2>&1; then
+  kubectl create secret docker-registry ecr-creds \
+    --namespace=todo-list-app \
+    --docker-server=875506561855.dkr.ecr.us-east-1.amazonaws.com \
+    --docker-username=AWS \
+    --docker-password="$(aws ecr get-login-password --region us-east-1)"
+else
+  echo "Secret 'ecr-creds' already exists in 'todo-list-app'. Skipping creation."
+fi
+
+
+section_header "****************   Kind & ArgoCD Setup Completed Successfully   ***************" "1"
