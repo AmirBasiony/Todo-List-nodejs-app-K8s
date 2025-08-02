@@ -47,32 +47,32 @@
 
 # ------------------ Create Kind Cluster ------------------
 
-- name: Create a Kind cluster named 'todo-list-cluster'
-  command: kind create cluster --name todo-list-cluster
-  register: kind_cluster_output
-  changed_when: "'Creating' in kind_cluster_output.stdout"
+# - name: Create a Kind cluster named 'todo-list-cluster'
+#   command: kind create cluster --name todo-list-cluster
+#   register: kind_cluster_output
+#   changed_when: "'Creating' in kind_cluster_output.stdout"
 
-- name: Print cluster creation output
-  debug:
-    var: kind_cluster_output.stdout
+# - name: Print cluster creation output
+#   debug:
+#     var: kind_cluster_output.stdout
 
-- name: Show Kind cluster info
-  command: kubectl cluster-info --context kind-todo-list-cluster
-  register: kind_cluster_info
-  changed_when: false
+# - name: Show Kind cluster info
+#   command: kubectl cluster-info --context kind-todo-list-cluster
+#   register: kind_cluster_info
+#   changed_when: false
 
-- name: Print Kind cluster info
-  debug:
-    var: kind_cluster_info.stdout_lines
+# - name: Print Kind cluster info
+#   debug:
+#     var: kind_cluster_info.stdout_lines
 
-- name: Show all Kubernetes nodes in Kind cluster
-  command: kubectl get nodes --context kind-todo-list-cluster -o wide
-  register: kube_nodes
-  changed_when: false
+# - name: Show all Kubernetes nodes in Kind cluster
+#   command: kubectl get nodes --context kind-todo-list-cluster -o wide
+#   register: kube_nodes
+#   changed_when: false
 
-- name: Print Kubernetes nodes in Kind cluster
-  debug:
-    var: kube_nodes.stdout_lines
+# - name: Print Kubernetes nodes in Kind cluster
+#   debug:
+#     var: kube_nodes.stdout_lines
 
 
 # # ------------------ Minikube Installation ------------------
