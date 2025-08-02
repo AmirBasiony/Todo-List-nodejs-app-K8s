@@ -162,7 +162,7 @@ Creates:
 ### 🔐 SSH into the EC2 Instance
 
 ```bash
-ssh -i todo-app-ssh-key.pem ubuntu@13.221.112.71
+ssh -i todo-app-ssh-key.pem ubuntu@<EC2_PUBLIC_IP>
 ```
 
 ---
@@ -175,7 +175,7 @@ In your SSH session or a new terminal:
 kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd
 ```
 
-* 🌐 Open your browser and go to: [http://13.221.112.71:8888](http://13.221.112.71:8888)
+* 🌐 Open your browser and go to: [http://<EC2_PUBLIC_IP>:8888](http://<EC2_PUBLIC_IP>:8888)
 
     ArgoCD dashboard may also be exposed for visualizing GitOps sync status.
 
@@ -189,7 +189,7 @@ In your SSH session or a new terminal:
 kubectl port-forward --address=0.0.0.0 service/todo-service 8080:4000 -n todo-list-app
 ```
 
-* 🌐 Open your browser and go to: [http://13.221.112.71:8080](http://13.221.112.71:8080)
+* 🌐 Open your browser and go to: [http://<EC2_PUBLIC_IP>:8080](http://<EC2_PUBLIC_IP>:8080)
 
 ---
 
