@@ -11,6 +11,6 @@ function section_header {
 }
 
 # Destroy infrastructure
-section_header "--------------------Destroy Infrastructure--------------------"
+section_header "*******************       Destroy Infrastructure      *************************"
 cd $TERRAFORM_DIR
 terraform destroy -auto-approve

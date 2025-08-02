@@ -25,13 +25,13 @@ cd "$TERRAFORM_DIR" || { echo "ERROR: Terraform directory not found!"; exit 1; }
 
 # Build infrastructure
 section_header "*********************    Building the infrastructure     **********************"
-# terraform init #-reconfigure
-# terraform validate
-# terraform apply -auto-approve -refresh=false
+terraform init #-reconfigure
+terraform validate
+terraform apply -auto-approve -refresh=false
 
-# # Generate infrastructure diagram
-# mkdir -p "$INFRA_DIAGRAM_DIR"
-# terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
+# Generate infrastructure diagram
+mkdir -p "$INFRA_DIAGRAM_DIR"
+terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
 
 # Get public IP
 EC2_PUBLIC_IP=$(terraform output -raw ec2_public_ip)
@@ -58,7 +58,7 @@ cat inventory.ini
 
 # Run Ansible (optional - uncomment if needed)
 section_header "**********************    Running ansible rules     ***************************" "1"
-# ansible-playbook -i inventory.ini --private-key "$SSH_KEY" EC2_server.yaml 
+ansible-playbook -i inventory.ini --private-key "$SSH_KEY" EC2_server.yaml 
 
 # Confirm EC2 is ready
 section_header "*********** Application EC2 server is configured successfully     *************" "1"
