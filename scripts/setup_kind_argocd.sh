@@ -28,12 +28,12 @@ if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
   section_header "****** Kind cluster '${CLUSTER_NAME}' already exists. Skipping creation *****" "1"
 else
   section_header "*************** Creating new Kind cluster: ${CLUSTER_NAME}  *****************" "1"
-  kind create cluster --name "$CLUSTER_NAME" --config ~/kind-config.yaml
+  kind create cluster --name "$CLUSTER_NAME"
 
 fi
 
 # Step 3: Verify Kind cluster is running
-section_header "********************     Verifying Kind cluster status     ********************"
+section_header "********************     Verifying Kind cluster status     ********************" "1"
 kind export kubeconfig --name "$CLUSTER_NAME"
 kubectl cluster-info --context kind-"$CLUSTER_NAME"
 kubectl get nodes --context kind-"$CLUSTER_NAME" #-o wide
@@ -74,10 +74,12 @@ echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
 echo "kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd"
 echo "Open in browser: http://$EC2_PUBLIC_IP:8888"
 
-echo  "To access The Todo-list app:"
+echo  "To access The Todos List app:"
 echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
 echo "kubectl port-forward --address=0.0.0.0 service/todo-service 8080:4000 -n todo-list-app"
 echo "Open in browser: http://$EC2_PUBLIC_IP:8080"
+
+# section_header "*********************  Creating ECR Docker registry secret  *******************"
 
 # Step 5: Setup App Namespace and Secrets for the application
 section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
