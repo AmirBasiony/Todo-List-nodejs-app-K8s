@@ -47,14 +47,20 @@
 
 # ------------------ Create Kind Cluster ------------------
 
-- name: Create a Kind cluster named 'todo-list-cluster'
-  command: kind create cluster --name todo-list-cluster
-  register: kind_cluster_output
-  changed_when: "'Creating' in kind_cluster_output.stdout"
+- name: Check if Kind cluster 'todo-list-cluster' exists
+  command: kind get clusters
+  register: existing_clusters
 
-- name: Print cluster creation output
+- name: Create a Kind cluster named 'todo-list-cluster' if it does not exist
+  command: kind create cluster --name todo-list-cluster
+  when: "'todo-list-cluster' not in existing_clusters.stdout_lines"
+  register: kind_cluster_output
+  changed_when: "'Creating' in kind_cluster_output.stdout or kind_cluster_output.rc == 0"
+
+- name: Print cluster creation output (if any)
   debug:
     var: kind_cluster_output.stdout
+  when: kind_cluster_output is defined
 
 - name: Show Kind cluster info
   command: kubectl cluster-info --context kind-todo-list-cluster

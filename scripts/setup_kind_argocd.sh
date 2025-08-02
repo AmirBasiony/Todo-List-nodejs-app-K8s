@@ -38,8 +38,9 @@ kind export kubeconfig --name "$CLUSTER_NAME"
 kubectl cluster-info --context kind-"$CLUSTER_NAME"
 kubectl get nodes --context kind-"$CLUSTER_NAME" #-o wide
 
-
 # Step 4: Install ArgoCD
+
+# Create 'argocd' namespace if it doesn't exist
 section_header "*******************        Creating 'argocd' namespace      *******************" "1"
 if ! kubectl get namespace argocd >/dev/null 2>&1; then
   kubectl create namespace argocd
@@ -66,33 +67,11 @@ ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o js
 echo "ArgoCD Username: admin"
 echo "ArgoCD Initial Password: $ARGOCD_PASSWORD"
 
-# Step 6: Port forwarding instructions
-section_header "**********************     Port Forward Instructions     **********************" "1"
 
-echo "To access ArgoCD (in one terminal):"
-echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
-echo "kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd"
-echo "Open in browser: http://$EC2_PUBLIC_IP:8888"
-
-echo  "To access The Todos List app:"
-echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
-echo "kubectl port-forward --address=0.0.0.0 service/todo-service 8080:4000 -n todo-list-app"
-echo "Open in browser: http://$EC2_PUBLIC_IP:8080"
-
-# section_header "*********************  Creating ECR Docker registry secret  *******************"
-
-# Step 5: Setup App Namespace and Secrets for the application
+# Step 6: Setup App Namespace and Secrets for the applicatio
 section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
-# Create 'argocd' namespace if it doesn't exist
-section_header "*******************        Creating 'argocd' namespace      *******************" "1"
-if ! kubectl get namespace argocd >/dev/null 2>&1; then
-  kubectl create namespace argocd
-else
-  echo "Namespace 'argocd' already exists. Skipping creation."
-fi
 
 # Create 'todo-list-app' namespace if it doesn't exist
-section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
 if ! kubectl get namespace todo-list-app >/dev/null 2>&1; then
   kubectl create namespace todo-list-app
 else
@@ -109,6 +88,19 @@ if ! kubectl get secret ecr-creds -n todo-list-app >/dev/null 2>&1; then
 else
   echo "Secret 'ecr-creds' already exists in 'todo-list-app'. Skipping creation."
 fi
+
+# Step 7: Port forwarding instructions
+section_header "**********************     Port Forward Instructions     **********************" "1"
+
+echo "To access ArgoCD (in one terminal):"
+echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
+echo "kubectl port-forward --address=0.0.0.0 svc/argocd-server 8888:80 -n argocd"
+echo "Open in browser: http://$EC2_PUBLIC_IP:8888"
+
+echo  "To access The Todos List app:"
+echo "ssh -i todo-app-ssh-key.pem ubuntu@$EC2_PUBLIC_IP"
+echo "kubectl port-forward --address=0.0.0.0 service/todo-service 8080:4000 -n todo-list-app"
+echo "Open in browser: http://$EC2_PUBLIC_IP:8080"
 
 
 section_header "****************   Kind & ArgoCD Setup Completed Successfully   ***************" "1"
