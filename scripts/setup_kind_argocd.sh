@@ -14,11 +14,14 @@ function section_header {
 }
 
 # Fetch EC2 public IP from metadata if possible
-if command -v curl &>/dev/null && curl -s http://169.254.169.254/latest/meta-data/public-ipv4 &>/dev/null; then
-  EC2_PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-else
-  EC2_PUBLIC_IP="<YOUR_EC2_PUBLIC_IP_HERE>"
+EC2_PUBLIC_IP=$1
+
+if [[ -z "$EC2_PUBLIC_IP" ]]; then
+  echo "ERROR: EC2 public IP not provided as an argument."
+  echo "You can provide it as the first argument when running this script."
+  exit 1
 fi
+
 
 # Define Kind cluster name
 CLUSTER_NAME="todo-list-cluster"

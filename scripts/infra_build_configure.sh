@@ -64,15 +64,17 @@ ansible-playbook -i inventory.ini --private-key "$SSH_KEY" EC2_server.yaml
 section_header "*********** Application EC2 server is configured successfully     *************" "1"
 echo
 
+sleep 10 # Wait for a few seconds to ensure the server is ready
+
 # Move to scripts dir
 cd "$SCRIPTS_DIR" || { echo "ERROR: Scripts directory not found!"; exit 1; }
 
 # SCP and remote execution
 scp -i "$SSH_KEY" ../ArgoCD-Apps/application.yaml ubuntu@"$EC2_PUBLIC_IP":~/application.yaml
-scp -i "$SSH_KEY" setup_kind_argocd.sh ubuntu@"$EC2_PUBLIC_IP":~/setup_kind_argocd.sh
+scp -i "$SSH_KEY" setup_kind_argocd.sh ubuntu@"$EC2_PUBLIC_IP":~/setup_kind_argocd.sh 
 section_header "**************    Running setup_kind_argocd.sh on remote server    ************" "1"
 ssh -i "$SSH_KEY" ubuntu@"$EC2_PUBLIC_IP" \
-  "chmod +x ~/setup_kind_argocd.sh && ~/setup_kind_argocd.sh"
+  "chmod +x ~/setup_kind_argocd.sh && ~/setup_kind_argocd.sh $EC2_PUBLIC_IP"
 
 # Return to root project directory
 cd ../
