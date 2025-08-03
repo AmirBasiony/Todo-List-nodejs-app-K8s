@@ -15,7 +15,7 @@ function section_header {
 
 # Fetch EC2 public IP from metadata if possible
 EC2_PUBLIC_IP=$1
-
+echo "Using EC2 Public IP: $EC2_PUBLIC_IP"
 if [[ -z "$EC2_PUBLIC_IP" ]]; then
   echo "ERROR: EC2 public IP not provided as an argument."
   echo "You can provide it as the first argument when running this script."
@@ -63,15 +63,9 @@ kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "ClusterIP"}}' |
 section_header "********************  Applying ArgoCD Application manifest  *******************" "1"
 kubectl apply -f /home/ubuntu/application.yaml
 
-# Step 5: Access Info
-section_header "**********************  Fetching ArgoCD credentials  **************************" "1"
-ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-
-echo "ArgoCD Username: admin"
-echo "ArgoCD Initial Password: $ARGOCD_PASSWORD"
 
 
-# Step 6: Setup App Namespace and Secrets for the applicatio
+# Step 5: Setup App Namespace and Secrets for the applicatio
 section_header "*******  Creating 'todo-list-app' namespace & ECR Docker registry secret ******" "1"
 
 # Create 'todo-list-app' namespace if it doesn't exist
@@ -91,6 +85,13 @@ if ! kubectl get secret ecr-creds -n todo-list-app >/dev/null 2>&1; then
 else
   echo "Secret 'ecr-creds' already exists in 'todo-list-app'. Skipping creation."
 fi
+
+# Step 6: Access Info
+section_header "**********************  Fetching ArgoCD credentials  **************************" "1"
+ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+
+echo "ArgoCD Username: admin"
+echo "ArgoCD Initial Password: $ARGOCD_PASSWORD"
 
 # Step 7: Port forwarding instructions
 section_header "**********************     Port Forward Instructions     **********************" "1"
