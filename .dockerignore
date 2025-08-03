@@ -1,0 +1,12 @@
+
+terraform/
+scripts/
+Project_Stages_Images/
+Ansible_Rules/
+.github/
+.git/
+
+.env
+requirements*
+*.yml
+*.md
