@@ -27,7 +27,13 @@ cd "$TERRAFORM_DIR" || { echo "ERROR: Terraform directory not found!"; exit 1; }
 section_header "*********************    Building the infrastructure     **********************"
 terraform init #-reconfigure
 terraform validate
-terraform apply -auto-approve -refresh=false
+terraform apply -auto-approve #-refresh=false
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: Terraform apply failed."
+  echo "Please check the Terraform configuration and try again."
+  exit 1
+fi
 
 # Generate infrastructure diagram
 mkdir -p "$INFRA_DIAGRAM_DIR"
@@ -56,15 +62,20 @@ echo -e "[remote_target]\n$EC2_PUBLIC_IP" > inventory.ini
 chmod 644 inventory.ini
 cat inventory.ini
 
-# Run Ansible (optional - uncomment if needed)
-section_header "**********************    Running ansible rules     ***************************" "1"
+sleep 10 # Wait for a few seconds to ensure the server is ready
+
+# Run Ansible 
+section_header "**********************    Running ansible roles     ***************************" "1"
 ansible-playbook -i inventory.ini --private-key "$SSH_KEY" EC2_server.yaml 
 
 # Confirm EC2 is ready
 section_header "*********** Application EC2 server is configured successfully     *************" "1"
 echo
 
-sleep 10 # Wait for a few seconds to ensure the server is ready
+if [ $? -ne 0 ]; then
+  echo "ERROR: Ansible playbook execution failed."
+  exit 1
+fi
 
 # Move to scripts dir
 cd "$SCRIPTS_DIR" || { echo "ERROR: Scripts directory not found!"; exit 1; }
