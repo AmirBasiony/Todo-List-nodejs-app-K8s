@@ -5,4 +5,4 @@ terraform/*tfvars*
 terraform/.terraform*
 terraform/*tfstate*
 
-./.env
+.env
